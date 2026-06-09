@@ -42,19 +42,9 @@ A funder that always batches and dispatches at the same second is a strong finge
 
 Distributing exact same amounts to N wallets creates a uniform signature. Add per-wallet jitter (±5–10%) so amounts don't look templated.
 
-### 5. Micro-fund for gas closure
+### 5. Gas-bridge for orphan wallets
 
-When a wallet has 0 SOL but holds a token bag you want to sweep, the wallet can't pay TX fees to close its own ATA. Pattern: transfer the minimum (~0.0008 SOL) from a designated micro-funder, then run the close → sweep sequence.
-
-```ts
-// pseudo-code
-const FEE_MARGIN = 0.0008 * LAMPORTS_PER_SOL;
-if (await connection.getBalance(orphan) < FEE_MARGIN) {
-  await transferLamports(microFunder, orphan, FEE_MARGIN);
-}
-await closeAccount(orphan, ata);
-await transfer(orphan.sol, sweepDestination);
-```
+When a wallet has 0 SOL but holds a token bag you want to sweep, it can't pay TX fees to close its own ATA. The general approach is to bridge just enough lamports from a designated funder, then run the close → sweep sequence. The exact gas margin depends on current fee market conditions; budget conservatively and refund overages back.
 
 ### 6. Rent-recovery cycle
 
